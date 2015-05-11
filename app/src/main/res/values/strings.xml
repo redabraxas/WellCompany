@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">웰컴퍼니</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+
+    <string name="menu_myinfo">내 정보 수정</string>
+    <string name="menu_logout">로그아웃</string>
+    <string name="menu_mylist">내 글 보기</string>
+    <string name="menu_admin">관리자 메뉴</string>
+    <string name="menu_bookmark">즐겨찾기 설정</string>
+    <string name="menu_myapply">나의 신청 내역</string>
+
+
+</resources>

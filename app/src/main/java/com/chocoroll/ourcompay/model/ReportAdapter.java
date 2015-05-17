@@ -40,11 +40,9 @@ public class ReportAdapter  extends ArrayAdapter<Report> {
 //
 //            new DownloadImageTask((ImageView) v.findViewById(R.id.thumbnailDeal))
 //                    .execute(p.getThumbnail());
-//
-//            String str = "["+p.getbCategory()+"/"+p.getsCategory()+"]  "+p.getName();
-//            ((TextView)  v.findViewById(R.id.txt_name)).setText(str);
-//            ((TextView) v.findViewById(R.id.txt_dday)).setText(p.getDday());
-//            ((TextView)  v.findViewById(R.id.txt_people)).setText(String.valueOf(p.getBook()+"/"+p.getMaxBook()));
+
+            String str = "["+p.getCompanyName()+"]  "+p.getPurpose();
+            ((TextView)  v.findViewById(R.id.reportTitle)).setText(str);
         }
         return v;
     }

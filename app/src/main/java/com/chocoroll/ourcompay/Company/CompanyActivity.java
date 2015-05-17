@@ -1,6 +1,9 @@
 package com.chocoroll.ourcompay.Company;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -18,17 +21,28 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.astuetz.PagerSlidingTabStrip;
 import com.chocoroll.ourcompay.Home.ReportListFragment;
 import com.chocoroll.ourcompay.R;
+import com.chocoroll.ourcompay.Retrofit.Retrofit;
 import com.chocoroll.ourcompay.model.Company;
+import com.chocoroll.ourcompay.model.Report;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 import java.io.InputStream;
 
+import retrofit.Callback;
+import retrofit.RestAdapter;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
+
 public class CompanyActivity extends FragmentActivity {
 
-    Company company;
+    ProgressDialog dialog;
+    static Company company;
 
     private PagerSlidingTabStrip tabs;
     private ViewPager pager;
@@ -39,6 +53,7 @@ public class CompanyActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_company);
 
+        company = getIntent().getParcelableExtra("Company");
 
         tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
         pager = (ViewPager) findViewById(R.id.pager);
@@ -50,8 +65,41 @@ public class CompanyActivity extends FragmentActivity {
         pager.setPageMargin(pageMargin);
         tabs.setViewPager(pager);
 
+
+        new DownloadImageTask((ImageView) findViewById(R.id.comLogo)).execute(company.getLogo());
+        ((TextView)findViewById(R.id.comName)).setText(company.getName());
+        ((TextView)findViewById(R.id.comCategory)).setText(company.getbCategory()+" > "+company.getsCategory());
+
+
+
     }
 
+
+
+    private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
+        ImageView bmImage;
+
+        public DownloadImageTask(ImageView bmImage) {
+            this.bmImage = bmImage;
+        }
+
+        protected Bitmap doInBackground(String... urls) {
+            String urldisplay = urls[0];
+            Bitmap mIcon11 = null;
+            try {
+                InputStream in = new java.net.URL(urldisplay).openStream();
+                mIcon11 = BitmapFactory.decodeStream(in);
+            } catch (Exception e) {
+                Log.e("Error", e.getMessage());
+                e.printStackTrace();
+            }
+            return mIcon11;
+        }
+
+        protected void onPostExecute(Bitmap result) {
+            bmImage.setImageBitmap(result);
+        }
+    }
 
 
 
@@ -86,7 +134,7 @@ public class CompanyActivity extends FragmentActivity {
                     return new ReserveFragment(company.getNum());
                 case 2:
                     // 보고서 리스트
-                    return new ReportListFragment();
+                    return ReportListFragment.newInstanceCompany(company.getNum());
                 case 3:
                     // qna
                     return new QnaFragemnt(company.getRepID(), company.getNum());
@@ -116,41 +164,15 @@ public class CompanyActivity extends FragmentActivity {
             // Inflate the layout for this fragment
             View v = inflater.inflate(R.layout.fragment_company_detail, container, false);
 
-//            new DownloadImageTask((ImageView) v.findViewById(R.id.detailDealImage))
-//                    .execute(product.getDetailView());
-//
+            ((TextView)v.findViewById(R.id.comAddress)).setText(company.getAddress());
+            ((TextView)v.findViewById(R.id.comEmail)).setText(company.getEmail());
+            ((TextView)v.findViewById(R.id.comPhone)).setText(company.getPhone());
+            ((TextView)v.findViewById(R.id.comIntro)).setText(company.getIntro());
+            ((TextView)v.findViewById(R.id.comSite)).setText(company.getSite());
 
 
             return v;
         }
-
-
-        private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
-            ImageView bmImage;
-
-            public DownloadImageTask(ImageView bmImage) {
-                this.bmImage = bmImage;
-            }
-
-            protected Bitmap doInBackground(String... urls) {
-                String urldisplay = urls[0];
-                Bitmap mIcon11 = null;
-                try {
-                    InputStream in = new java.net.URL(urldisplay).openStream();
-                    mIcon11 = BitmapFactory.decodeStream(in);
-                } catch (Exception e) {
-                    Log.e("Error", e.getMessage());
-                    e.printStackTrace();
-                }
-                return mIcon11;
-            }
-
-            protected void onPostExecute(Bitmap result) {
-                bmImage.setImageBitmap(result);
-            }
-        }
-
-
 
         @Override
         public void onAttach(Activity activity) {
@@ -162,5 +184,7 @@ public class CompanyActivity extends FragmentActivity {
             super.onDetach();
         }
     }
+
+
 
 }

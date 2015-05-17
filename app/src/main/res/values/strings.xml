@@ -12,8 +12,11 @@
     <string name="menu_logout">로그아웃</string>
     <string name="menu_mylist">내 글 보기</string>
     <string name="menu_admin">관리자 메뉴</string>
-    <string name="menu_bookmark">즐겨찾기 설정</string>
+    <string name="menu_bookmark">즐겨찾기</string>
     <string name="menu_myapply">나의 신청 내역</string>
+
+    <string name="menu_company">회사 신청 목록</string>
+    <string name="menu_reserve">견학 예약 목록</string>
 
 
 
@@ -32,6 +35,7 @@
     </string-array>
 
     <string-array name="small_category_arrays_1">
+        <item>전체보기</item>
         <item>공기업·공공기관·협회</item>
         <item>은행·보험·증권·카드</item>
         <item>캐피탈·대출</item>
@@ -56,6 +60,7 @@
 
 
     <string-array name="small_category_arrays_2">
+        <item>전체보기</item>
         <item>방송·영상·프로덕션</item>
         <item>신문·잡지·인쇄·출판</item>
         <item>광고·홍보·전시</item>
@@ -67,6 +72,7 @@
 
 
     <string-array name="small_category_arrays_3">
+        <item>전체보기</item>
         <item>SI·SM·CRM·ERP</item>
         <item>웹에이전시</item>
         <item>소프트웨어·솔루션·ASP</item>
@@ -82,6 +88,7 @@
 
 
     <string-array name="small_category_arrays_4">
+        <item>전체보기</item>
        <item>전기·전자·제어</item>
        <item>반도체·디스플레이·광학</item>
        <item>컴퓨터·하드웨어·장비</item>
@@ -99,5 +106,7 @@
         <item>식품가공·농축산·어업</item>
     </string-array>
     <string name="title_activity_company">CompanyActivity</string>
+    <string name="title_activity_login">LoginActivity</string>
+    <string name="title_activity_join">JoinActivity</string>
 
 </resources>

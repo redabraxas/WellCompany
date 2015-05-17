@@ -9,18 +9,48 @@ import android.os.Parcelable;
 public class Report  implements Parcelable {
     String num;
     String companyNum;
+    String companyName;
 
     String id;
     String purpose;
     String content;
     String picture;
 
+    public String getCompanyName() {
+        return companyName;
+    }
+
+    public String getCompanyNum() {
+        return companyNum;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getNum() {
+        return num;
+    }
+
+    public String getPicture() {
+        return picture;
+    }
+
+    public String getPurpose() {
+        return purpose;
+    }
+
     public Report(Parcel in) {
         readFromParcel(in);
     }
-    public Report(String num, String companyNum, String id, String purpose, String content, String picture){
+    public Report(String num, String companyNum, String companyName, String id, String purpose, String content, String picture){
         this.num = num;
         this.companyNum = companyNum;
+        this.companyName =companyName;
         this.id= id;
         this.purpose = purpose;
         this.content =content;
@@ -38,6 +68,7 @@ public class Report  implements Parcelable {
 
         parcel.writeString(num);
         parcel.writeString(companyNum);
+        parcel.writeString(companyName);
 
         parcel.writeString(id);
         parcel.writeString(purpose);
@@ -49,6 +80,7 @@ public class Report  implements Parcelable {
     private void readFromParcel(Parcel in){
         num = in.readString();
         companyNum = in.readString();
+        companyName= in.readString();
 
         id = in.readString();
         purpose = in.readString();

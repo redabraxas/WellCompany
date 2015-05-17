@@ -17,6 +17,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Spinner;
 
 import com.astuetz.PagerSlidingTabStrip;
@@ -40,21 +42,20 @@ import retrofit.client.Response;
  */
 public class HomeFragment extends Fragment {
 
-    public interface homeFragemntCompanyListner{
-        public void setCompanyList(ArrayList<Company> companyList);
+    public interface HomeFragmentListner{
+        void setCategoryList(String bCategory, String sCategory, String search);
     }
 
-    public interface homeFragemntReportListner{
-        public void setReportList(ArrayList<Report> reportList);
-    }
+    CompanyListFragment companyListFragment;
+    ReportListFragment reportListFragment;
 
     ProgressDialog dialog;
     private PagerSlidingTabStrip tabs;
     private ViewPager pager;
-    private MyPagerAdapter adapter;
+    private MyPagerAdapter mAdapter;
 
-    ArrayList<Company> companyList = new ArrayList<Company>();
-    ArrayList<Report> reportList = new ArrayList<Report>();
+    String bCategory="전체보기", sCategory="전체보기";
+    String search ="";
 
     public HomeFragment() {
         // Required empty public constructor
@@ -66,18 +67,23 @@ public class HomeFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
 
-        View v = inflater.inflate(R.layout.fragment_home, container, false);
+        final View v = inflater.inflate(R.layout.fragment_home, container, false);
+
+        companyListFragment = CompanyListFragment.newInstance();
+        reportListFragment =  ReportListFragment.newInstance();
 
         tabs = (PagerSlidingTabStrip)v.findViewById(R.id.tabs);
         tabs.setTextColor(Color.WHITE);
         pager = (ViewPager)v.findViewById(R.id.pager);
-        adapter = new MyPagerAdapter(getChildFragmentManager());
-        pager.setAdapter(adapter);
+        mAdapter = new MyPagerAdapter(getChildFragmentManager());
+
         pager.setOffscreenPageLimit(2);
         final int pageMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2, getResources()
                 .getDisplayMetrics());
         pager.setPageMargin(pageMargin);
+        pager.setAdapter(mAdapter);
         tabs.setViewPager(pager);
+
 
 
 
@@ -109,13 +115,10 @@ public class HomeFragment extends Fragment {
                     adapter= ArrayAdapter.createFromResource(getActivity(), R.array.small_category_arrays_4,
                             android.R.layout.simple_spinner_item);
                     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                }else{
-                    // 전체보기인 경우
-
-                    getCompanyList("전체보기", "전체보기");
                 }
 
-
+                companyListFragment.setCategoryList(item,"전체보기","");
+                reportListFragment.setCategoryList(item,"전체보기","");
                 spinnerS.setAdapter(adapter);
 
             }
@@ -130,9 +133,12 @@ public class HomeFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
 
+                bCategory = spinnerB.getSelectedItem().toString();
+                sCategory = spinnerS.getSelectedItem().toString();
 
-                String item = spinnerS.getSelectedItem().toString();
-                getCompanyList(spinnerB.getSelectedItem().toString(), item);
+
+                companyListFragment.setCategoryList(bCategory,sCategory,"");
+                reportListFragment.setCategoryList(bCategory,sCategory,"");
             }
 
             @Override
@@ -141,7 +147,19 @@ public class HomeFragment extends Fragment {
             }
         });
 
-//
+
+        Button btnSearch = (Button)v.findViewById(R.id.btnSearch);
+        btnSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                search = ((EditText)v.findViewById(R.id.searchText)).getText().toString();
+                companyListFragment.setCategoryList(bCategory,sCategory,search);
+                reportListFragment.setCategoryList(bCategory,sCategory,search);
+            }
+        });
+
+        ((HomeFragmentListner)companyListFragment).setCategoryList("전체보기","전체보기","");
+        ((HomeFragmentListner)reportListFragment).setCategoryList("전체보기","전체보기","");
         return v;
     }
 
@@ -164,9 +182,11 @@ public class HomeFragment extends Fragment {
         public Fragment getItem(int position) {
            switch (position){
                case 0:
-                   return new CompanyListFragment();
+
+                   return companyListFragment;
                case 1:
-                   return new ReportListFragment();
+
+                   return reportListFragment;
            }
 
             return null;
@@ -189,161 +209,5 @@ public class HomeFragment extends Fragment {
 
 
 
-
-    void getCompanyList(String bCategory, String sCategory){
-
-
-        dialog = new ProgressDialog(getActivity());
-        dialog.setMessage("회사 리스트를 받아오는 중입니다...");
-        dialog.setIndeterminate(true);
-        dialog.setCancelable(false);
-        dialog.show();
-
-
-        final JsonObject info = new JsonObject();
-        info.addProperty("bCategory",bCategory);
-        info.addProperty("sCategory",sCategory);
-
-        new Thread(new Runnable() {
-            public void run() {
-                try {
-
-                    RestAdapter restAdapter = new RestAdapter.Builder()
-                            .setEndpoint(Retrofit.ROOT)  //call your base url
-                            .build();
-                    Retrofit retrofit = restAdapter.create(Retrofit.class); //this is how retrofit create your api
-                    retrofit.getCompanyList(info, new Callback<JsonArray>() {
-
-                        @Override
-                        public void success(JsonArray jsonElements, Response response) {
-
-                            Log.e("company", jsonElements.toString());
-                            dialog.dismiss();
-                            companyList.clear();
-
-                            for (int i = 0; i < jsonElements.size(); i++) {
-                                JsonObject deal = (JsonObject) jsonElements.get(i);
-                                String num = (deal.get("companyNum")).getAsString();
-                                String name = (deal.get("name")).getAsString();
-
-                                String bCategory = (deal.get("bCategory")).getAsString();
-                                String sCategory = (deal.get("sCategory")).getAsString();
-
-                                String logo = (deal.get("logo")).getAsString();
-                                String address = (deal.get("address")).getAsString();
-                                String site = (deal.get("site")).getAsString();
-                                String email = (deal.get("email")).getAsString();
-                                String phone = (deal.get("phone")).getAsString();
-                                String intro = (deal.get("intro")).getAsString();
-
-                                String repID = (deal.get("repID")).getAsString();
-
-                                companyList.add(new Company(num,name,bCategory,sCategory,logo,address,site,email,phone,intro, repID));
-
-                            }
-                            ((homeFragemntCompanyListner) getActivity().getSupportFragmentManager().findFragmentById(R.id.container)).setCompanyList(companyList);
-                            getReportList(info);
-                        }
-
-                        @Override
-                        public void failure(RetrofitError retrofitError) {
-                            dialog.dismiss();
-                            Log.e("error", retrofitError.getCause().toString());
-                            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                            builder.setTitle("네트워크가 불안정합니다.")        // 제목 설정
-                                    .setMessage("네트워크를 확인해주세요")        // 메세지 설정
-                                    .setCancelable(false)        // 뒤로 버튼 클릭시 취소 가능 설정
-                                    .setPositiveButton("확인", new DialogInterface.OnClickListener() {
-                                        // 확인 버튼 클릭시 설정
-                                        public void onClick(DialogInterface dialog, int whichButton) {
-                                        }
-                                    });
-
-                            AlertDialog dialog = builder.create();    // 알림창 객체 생성
-                            dialog.show();    // 알림창 띄우기
-
-                        }
-                    });
-                }
-                catch (Throwable ex) {
-
-                }
-            }
-        }).start();
-
-
-    }
-
-
-
-    void getReportList(final JsonObject info){
-
-        dialog = new ProgressDialog(getActivity());
-        dialog.setMessage("보고서 리스트를 받아오는 중입니다...");
-        dialog.setIndeterminate(true);
-        dialog.setCancelable(false);
-        dialog.show();
-
-        new Thread(new Runnable() {
-            public void run() {
-                try {
-
-                    RestAdapter restAdapter = new RestAdapter.Builder()
-                            .setEndpoint(Retrofit.ROOT)  //call your base url
-                            .build();
-                    Retrofit retrofit = restAdapter.create(Retrofit.class); //this is how retrofit create your api
-                    retrofit.getReportList(info, new Callback<JsonArray>() {
-
-                        @Override
-                        public void success(JsonArray jsonElements, Response response) {
-                            Log.e("report", jsonElements.toString());
-                            dialog.dismiss();
-                            reportList.clear();
-
-                            for (int i = 0; i < jsonElements.size(); i++) {
-                                JsonObject deal = (JsonObject) jsonElements.get(i);
-                                String num = (deal.get("reportNum")).getAsString();
-                                String companyNum = (deal.get("companyNum")).getAsString();
-
-                                String id = (deal.get("id")).getAsString();
-                                String purpose = (deal.get("purpose")).getAsString();
-
-                                String content = (deal.get("content")).getAsString();
-                                String picture = (deal.get("picture")).getAsString();
-
-                                reportList.add(new Report(num,companyNum,id,purpose,content,picture));
-
-                            }
-                            ((homeFragemntReportListner) getActivity().getSupportFragmentManager().findFragmentById(R.id.container)).setReportList(reportList);
-                        }
-
-                        @Override
-                        public void failure(RetrofitError retrofitError) {
-                            dialog.dismiss();
-                            Log.e("error", retrofitError.getCause().toString());
-                            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                            builder.setTitle("네트워크가 불안정합니다.")        // 제목 설정
-                                    .setMessage("네트워크를 확인해주세요")        // 메세지 설정
-                                    .setCancelable(false)        // 뒤로 버튼 클릭시 취소 가능 설정
-                                    .setPositiveButton("확인", new DialogInterface.OnClickListener() {
-                                        // 확인 버튼 클릭시 설정
-                                        public void onClick(DialogInterface dialog, int whichButton) {
-                                        }
-                                    });
-
-                            AlertDialog dialog = builder.create();    // 알림창 객체 생성
-                            dialog.show();    // 알림창 띄우기
-
-                        }
-                    });
-                }
-                catch (Throwable ex) {
-
-                }
-            }
-        }).start();
-
-
-    }
 
 }

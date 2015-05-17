@@ -6,7 +6,7 @@
     <color name="slide_background">#ff57555c</color>
 
 
-    <color name="tab_background">#ff55ac98</color>
-    <color name="tab_indicate">#ff295349</color>
+    <color name="tab_background">#ff9e8fff</color>
+    <color name="tab_indicate">#ff5f55ac</color>
 
 </resources>

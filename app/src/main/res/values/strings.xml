@@ -17,7 +17,11 @@
 
 
 
+
   <!--카테고리 리스트-->
+    <string name="big_category_prompt">대분류</string>
+    <string name="small_category_prompt">소분류</string>
+
     <string-array name="big_category_arrays">
         <item>전체보기</item>
         <item>서비스·교육·금융·유통</item>
@@ -94,5 +98,6 @@
        <item>목재·제지·가구</item>
         <item>식품가공·농축산·어업</item>
     </string-array>
+    <string name="title_activity_company">CompanyActivity</string>
 
 </resources>

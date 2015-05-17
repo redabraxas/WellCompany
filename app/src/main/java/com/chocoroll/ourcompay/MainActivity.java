@@ -1,6 +1,7 @@
 package com.chocoroll.ourcompay;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -23,8 +24,18 @@ public class MainActivity extends FragmentActivity {
     public static final int USER = 1;
     public static final int COMPANY = 2;
     public static final int ADMIN = 3;
-    private String userid;
+    private String userid="";
     private int loginmode=0;
+
+    public String getUserId(){
+        return userid;
+    }
+    public int getLoginmode() { return loginmode; }
+    public void setUserId(String id){
+        userid= id;
+    }
+
+    public static Context mContext;
 
 
     @Override
@@ -33,6 +44,8 @@ public class MainActivity extends FragmentActivity {
         setContentView(R.layout.activity_main);
         Intent intent = new Intent(this, SplashActivity.class);
         startActivity(intent);
+
+        mContext = this;
 
 
         slidingMenu = new SlidingMenu(this);

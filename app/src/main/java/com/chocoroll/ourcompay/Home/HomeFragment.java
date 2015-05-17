@@ -21,6 +21,18 @@ import android.widget.Spinner;
 
 import com.astuetz.PagerSlidingTabStrip;
 import com.chocoroll.ourcompay.R;
+import com.chocoroll.ourcompay.Retrofit.Retrofit;
+import com.chocoroll.ourcompay.model.Company;
+import com.chocoroll.ourcompay.model.Report;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
+import java.util.ArrayList;
+
+import retrofit.Callback;
+import retrofit.RestAdapter;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 
 /**
@@ -28,11 +40,21 @@ import com.chocoroll.ourcompay.R;
  */
 public class HomeFragment extends Fragment {
 
+    public interface homeFragemntCompanyListner{
+        public void setCompanyList(ArrayList<Company> companyList);
+    }
+
+    public interface homeFragemntReportListner{
+        public void setReportList(ArrayList<Report> reportList);
+    }
+
     ProgressDialog dialog;
     private PagerSlidingTabStrip tabs;
     private ViewPager pager;
     private MyPagerAdapter adapter;
 
+    ArrayList<Company> companyList = new ArrayList<Company>();
+    ArrayList<Report> reportList = new ArrayList<Report>();
 
     public HomeFragment() {
         // Required empty public constructor
@@ -90,12 +112,7 @@ public class HomeFragment extends Fragment {
                 }else{
                     // 전체보기인 경우
 
-                    dialog = new ProgressDialog(getActivity());
-                    dialog.setMessage("딜 리스트를 받아오는 중입니다...");
-                    dialog.setIndeterminate(true);
-                    dialog.setCancelable(false);
-                    dialog.show();
-                    getDealList("전체보기", "전체보기");
+                    getCompanyList("전체보기", "전체보기");
                 }
 
 
@@ -115,8 +132,7 @@ public class HomeFragment extends Fragment {
 
 
                 String item = spinnerS.getSelectedItem().toString();
-                getDealList(spinnerB.getSelectedItem().toString(),item);
-                Log.e("sitem", item);
+                getCompanyList(spinnerB.getSelectedItem().toString(), item);
             }
 
             @Override
@@ -125,7 +141,7 @@ public class HomeFragment extends Fragment {
             }
         });
 
-
+//
         return v;
     }
 
@@ -174,10 +190,11 @@ public class HomeFragment extends Fragment {
 
 
 
-    void getDealList(String bCategory, String sCategory){
+    void getCompanyList(String bCategory, String sCategory){
+
 
         dialog = new ProgressDialog(getActivity());
-        dialog.setMessage("회사 및 보고서 리스트를 받아오는 중입니다...");
+        dialog.setMessage("회사 리스트를 받아오는 중입니다...");
         dialog.setIndeterminate(true);
         dialog.setCancelable(false);
         dialog.show();
@@ -195,50 +212,115 @@ public class HomeFragment extends Fragment {
                             .setEndpoint(Retrofit.ROOT)  //call your base url
                             .build();
                     Retrofit retrofit = restAdapter.create(Retrofit.class); //this is how retrofit create your api
-                    retrofit.getDealList(info,new Callback<JsonArray>() {
+                    retrofit.getCompanyList(info, new Callback<JsonArray>() {
 
                         @Override
                         public void success(JsonArray jsonElements, Response response) {
 
+                            Log.e("company", jsonElements.toString());
                             dialog.dismiss();
+                            companyList.clear();
 
-                            for(int i=0; i<jsonElements.size(); i++) {
+                            for (int i = 0; i < jsonElements.size(); i++) {
                                 JsonObject deal = (JsonObject) jsonElements.get(i);
-                                String num = (deal.get("proNum")).getAsString();
-                                String name = (deal.get("proName")).getAsString();
-                                String price = (deal.get("proPrice")).getAsString();
+                                String num = (deal.get("companyNum")).getAsString();
+                                String name = (deal.get("name")).getAsString();
 
-                                String bCategory = (deal.get("bigCategory")).getAsString();
-                                String sCategory = (deal.get("smallCategory")).getAsString();
+                                String bCategory = (deal.get("bCategory")).getAsString();
+                                String sCategory = (deal.get("sCategory")).getAsString();
 
-                                String dday = (deal.get("limitDate")).getAsString();
-                                String maxBook = (deal.get("maxBook")).getAsString();
-
-                                String keep = (deal.get("keepCount")).getAsString();
-                                String book = (deal.get("bookCount")).getAsString();
-
-                                String thumbnail = (deal.get("thumbnail")).getAsString();
-                                String detailView = (deal.get("detailView")).getAsString();
-                                String comment = (deal.get("proComment")).getAsString();
-
-                                String seller = (deal.get("sellerID")).getAsString();
+                                String logo = (deal.get("logo")).getAsString();
+                                String address = (deal.get("address")).getAsString();
+                                String site = (deal.get("site")).getAsString();
+                                String email = (deal.get("email")).getAsString();
                                 String phone = (deal.get("phone")).getAsString();
+                                String intro = (deal.get("intro")).getAsString();
 
-                                String state = (deal.get("state")).getAsString();
+                                String repID = (deal.get("repID")).getAsString();
 
-
-                                pList.add(new Deal(num, name,price, bCategory, sCategory, dday, maxBook, keep,book, thumbnail, detailView,
-                                        comment, seller, phone, state));
+                                companyList.add(new Company(num,name,bCategory,sCategory,logo,address,site,email,phone,intro, repID));
 
                             }
-
-                            listView.setAdapter(mAdapter);
+                            ((homeFragemntCompanyListner) getActivity().getSupportFragmentManager().findFragmentById(R.id.container)).setCompanyList(companyList);
+                            getReportList(info);
                         }
 
                         @Override
                         public void failure(RetrofitError retrofitError) {
                             dialog.dismiss();
-                            Log.e("error",retrofitError.getCause().toString());
+                            Log.e("error", retrofitError.getCause().toString());
+                            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                            builder.setTitle("네트워크가 불안정합니다.")        // 제목 설정
+                                    .setMessage("네트워크를 확인해주세요")        // 메세지 설정
+                                    .setCancelable(false)        // 뒤로 버튼 클릭시 취소 가능 설정
+                                    .setPositiveButton("확인", new DialogInterface.OnClickListener() {
+                                        // 확인 버튼 클릭시 설정
+                                        public void onClick(DialogInterface dialog, int whichButton) {
+                                        }
+                                    });
+
+                            AlertDialog dialog = builder.create();    // 알림창 객체 생성
+                            dialog.show();    // 알림창 띄우기
+
+                        }
+                    });
+                }
+                catch (Throwable ex) {
+
+                }
+            }
+        }).start();
+
+
+    }
+
+
+
+    void getReportList(final JsonObject info){
+
+        dialog = new ProgressDialog(getActivity());
+        dialog.setMessage("보고서 리스트를 받아오는 중입니다...");
+        dialog.setIndeterminate(true);
+        dialog.setCancelable(false);
+        dialog.show();
+
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+
+                    RestAdapter restAdapter = new RestAdapter.Builder()
+                            .setEndpoint(Retrofit.ROOT)  //call your base url
+                            .build();
+                    Retrofit retrofit = restAdapter.create(Retrofit.class); //this is how retrofit create your api
+                    retrofit.getReportList(info, new Callback<JsonArray>() {
+
+                        @Override
+                        public void success(JsonArray jsonElements, Response response) {
+                            Log.e("report", jsonElements.toString());
+                            dialog.dismiss();
+                            reportList.clear();
+
+                            for (int i = 0; i < jsonElements.size(); i++) {
+                                JsonObject deal = (JsonObject) jsonElements.get(i);
+                                String num = (deal.get("reportNum")).getAsString();
+                                String companyNum = (deal.get("companyNum")).getAsString();
+
+                                String id = (deal.get("id")).getAsString();
+                                String purpose = (deal.get("purpose")).getAsString();
+
+                                String content = (deal.get("content")).getAsString();
+                                String picture = (deal.get("picture")).getAsString();
+
+                                reportList.add(new Report(num,companyNum,id,purpose,content,picture));
+
+                            }
+                            ((homeFragemntReportListner) getActivity().getSupportFragmentManager().findFragmentById(R.id.container)).setReportList(reportList);
+                        }
+
+                        @Override
+                        public void failure(RetrofitError retrofitError) {
+                            dialog.dismiss();
+                            Log.e("error", retrofitError.getCause().toString());
                             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                             builder.setTitle("네트워크가 불안정합니다.")        // 제목 설정
                                     .setMessage("네트워크를 확인해주세요")        // 메세지 설정
